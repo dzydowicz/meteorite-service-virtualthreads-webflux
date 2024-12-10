@@ -1,0 +1,80 @@
+version: "3.8"
+
+services:
+  postgresdb:
+    image: postgres
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - POSTGRES_USER=${POSTGRESDB_USER}
+      - POSTGRES_PASSWORD=${POSTGRESDB_ROOT_PASSWORD}
+      - POSTGRES_DB=${POSTGRESDB_DATABASE}
+    ports:
+      - "${POSTGRESDB_LOCAL_PORT}:${POSTGRESDB_DOCKER_PORT}"
+    volumes:
+      - db:/var/lib/postgres/data
+      - ./database/import_data.sql:/docker-entrypoint-initdb.d/import_data.sql
+      - ./database/meteorite_landings.csv:/tmp/meteorite_landings.csv
+
+  calculations-service:
+    build:
+      context: ./calculations-service
+      dockerfile: Dockerfile
+    container_name: calculations-service
+    ports:
+      - "${CALCULATIONS_SERVICE_LOCAL_PORT}:${CALCULATIONS_SERVICE_DOCKER_PORT}"
+    networks:
+      - app-network
+    volumes:
+      - ~/.m2:/root/.m2
+    command: ["java", "-jar", "app.jar"]
+
+  virtual-threads-app:
+    depends_on:
+      - postgresdb
+    build:
+      context: ./virtual-threads-app
+      dockerfile: Dockerfile
+    container_name: virtual-threads-app
+    env_file: ./.env
+    environment:
+      - DB_HOST=${POSTGRESDB_HOST}
+      - DB_PORT=${POSTGRESDB_LOCAL_PORT}
+      - DB_NAME=${POSTGRESDB_DATABASE}
+      - DB_USERNAME=${POSTGRESDB_USER}
+      - DB_PASSWORD=${POSTGRESDB_ROOT_PASSWORD}
+    ports:
+      - "${VIRTUAL_THREADS_APP_LOCAL_PORT}:${VIRTUAL_THREADS_APP_DOCKER_PORT}"
+    networks:
+      - app-network
+    volumes:
+      - ~/.m2:/root/.m2
+    command: ["java", "-jar", "app.jar"]
+
+  webflux-app:
+    depends_on:
+      - postgresdb
+    build:
+      context: ./webflux-app
+      dockerfile: Dockerfile
+    container_name: webflux-app
+    env_file: ./.env
+    environment:
+      - DB_HOST=${POSTGRESDB_HOST}
+      - DB_PORT=${POSTGRESDB_LOCAL_PORT}
+      - DB_NAME=${POSTGRESDB_DATABASE}
+      - DB_USERNAME=${POSTGRESDB_USER}
+      - DB_PASSWORD=${POSTGRESDB_ROOT_PASSWORD}
+    ports:
+      - "${WEBFLUX_APP_LOCAL_PORT}:${WEBFLUX_APP_DOCKER_PORT}"
+    networks:
+      - app-network
+    volumes:
+      - ~/.m2:/root/.m2
+    command: ["java", "-jar", "app.jar"]
+
+volumes:
+  db:
+
+networks:
+  app-network:
