@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CalculateKineticEnergyRequest {
-    private Integer mass;
+    private Float mass;
 }
