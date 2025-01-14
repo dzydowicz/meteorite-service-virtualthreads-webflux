@@ -23,7 +23,7 @@ class CalculationsServiceRestClient implements CalculationsServicePort {
             ResponseEntity<R> response = restTemplate.postForEntity(url, request, responseType);
             return response.getBody();
         } catch (Exception e) {
-            throw new RuntimeException(e); //TODO change exception
+            throw new CalculationsServiceRestClientException("Failed to call Calculations Service API: " + e.getMessage());
         }
     }
 
