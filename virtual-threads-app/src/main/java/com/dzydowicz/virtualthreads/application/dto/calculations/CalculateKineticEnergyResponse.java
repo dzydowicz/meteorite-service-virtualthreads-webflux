@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CalculateKineticEnergyResponse {
-    private Double kineticEnergy;
+    private Float kineticEnergy;
 }
