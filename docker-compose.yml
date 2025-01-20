@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   postgresdb:
+    container_name: postgresdb
     image: postgres
     restart: unless-stopped
     env_file: ./.env
@@ -11,6 +12,8 @@ services:
       - POSTGRES_DB=${POSTGRESDB_DATABASE}
     ports:
       - "${POSTGRESDB_LOCAL_PORT}:${POSTGRESDB_DOCKER_PORT}"
+    networks:
+      - app-network
     volumes:
       - db:/var/lib/postgres/data
       - ./database/import_data.sql:/docker-entrypoint-initdb.d/import_data.sql
