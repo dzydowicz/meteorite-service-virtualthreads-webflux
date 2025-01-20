@@ -15,7 +15,7 @@ class CalculationsServiceRestClient implements CalculationsServicePort {
 
     @Override
     public CalculateKineticEnergyResponse calculateKineticEnergy(CalculateKineticEnergyRequest request) {
-        return performPostApiCall(calculationsServiceUrl, request, CalculateKineticEnergyResponse.class);
+        return performPostApiCall(calculationsServiceUrl + "/calculate-kinetic-energy", request, CalculateKineticEnergyResponse.class);
     }
 
     private <R, T> R performPostApiCall(String url, T request, Class<R> responseType) {
