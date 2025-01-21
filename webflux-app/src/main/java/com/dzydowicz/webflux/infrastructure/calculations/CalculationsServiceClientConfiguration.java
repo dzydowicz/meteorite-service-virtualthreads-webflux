@@ -20,6 +20,6 @@ class CalculationsServiceClientConfiguration {
 
     @Bean
     CalculationsServicePort calculationsServicePort(WebClient webClient) {
-        return new CalculationsServiceRestClient(webClient, env.getProperty("calculations.service.url"));
+        return new CalculationsServiceRestClient(webClient, env.getProperty("calculations-service.api.url"));
     }
 }
