@@ -13,8 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -33,7 +35,7 @@ class MeteoriteLandingController {
     }
 
     @GetMapping
-    public Mono<ResponseEntity<List<MeteoriteLandingDTO>>> listMeteoriteLandings(
+    public Flux<MeteoriteLandingDTO> listMeteoriteLandings(
             @RequestParam(value = "ids", required = false) List<Integer> ids,
             @RequestParam(value = "nameType", required = false) MeteoriteLandingNameTypeEnum nameType,
             @RequestParam(value = "fall", required = false) MeteoriteLandingFallEnum fall,
@@ -43,7 +45,7 @@ class MeteoriteLandingController {
             @RequestParam(value = "maxYear", required = false) Integer maxYear) {
 
         MeteoriteLandingFilterDTO filter = MeteoriteLandingFilterDTO.builder()
-                .ids(ids)
+                .ids(ids == null ? Collections.emptyList() : ids)
                 .nameType(nameType)
                 .fall(fall)
                 .minMass(minMass)
@@ -53,26 +55,22 @@ class MeteoriteLandingController {
                 .build();
 
         return meteoriteLandingServicePort
-                .getMeteoriteLandings(filter)
-                .collectList()
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.ok(List.of()));
+                .getMeteoriteLandings(filter);
     }
 
     @PostMapping
-    public Mono<ResponseEntity<MeteoriteLandingDTO>> createMeteoriteLanding(
-            @RequestBody CreateMeteoriteLandingRequest createMeteoriteLandingRequest) {
-
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<MeteoriteLandingDTO> createMeteoriteLanding(@RequestBody CreateMeteoriteLandingRequest createMeteoriteLandingRequest) {
         return meteoriteLandingServicePort
-                .createMeteoriteLanding(createMeteoriteLandingRequest)
-                .map(created -> new ResponseEntity<>(created, HttpStatus.CREATED));
+                .createMeteoriteLanding(createMeteoriteLandingRequest);
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<String>> removeMeteoriteLanding(@PathVariable Long id) {
+    public Mono<ResponseEntity<Void>> removeMeteoriteLanding(@PathVariable Long id) {
         return meteoriteLandingServicePort
                 .removeMeteoriteLanding(id)
-                .then(Mono.just(ResponseEntity.ok("Meteorite landing with id " + id + " correctly removed.")));
+                .then(Mono.fromCallable(() -> ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/impact-energy")
@@ -84,7 +82,7 @@ class MeteoriteLandingController {
     }
 
     @GetMapping("/impact-energy")
-    public Mono<ResponseEntity<List<MeteoriteLandingKineticEnergyDTO>>> getMeteoriteLandingImpactEnergy(
+    public Flux<MeteoriteLandingKineticEnergyDTO> getMeteoriteLandingImpactEnergy(
             @RequestParam(value = "ids", required = false) List<Integer> ids,
             @RequestParam(value = "nameType", required = false) MeteoriteLandingNameTypeEnum nameType,
             @RequestParam(value = "fall", required = false) MeteoriteLandingFallEnum fall,
@@ -94,7 +92,7 @@ class MeteoriteLandingController {
             @RequestParam(value = "maxYear", required = false) Integer maxYear) {
 
         MeteoriteLandingFilterDTO filter = MeteoriteLandingFilterDTO.builder()
-                .ids(ids)
+                .ids(ids == null ? Collections.emptyList() : ids)
                 .nameType(nameType)
                 .fall(fall)
                 .minMass(minMass)
@@ -104,9 +102,6 @@ class MeteoriteLandingController {
                 .build();
 
         return meteoriteLandingsCalculationsServicePort
-                .getMeteoriteLandingsWithKineticEnergyList(filter) // returns Flux<MeteoriteLandingKineticEnergyDTO>
-                .collectList()
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.ok(List.of()));
+                .getMeteoriteLandingsWithKineticEnergyList(filter);
     }
 }
