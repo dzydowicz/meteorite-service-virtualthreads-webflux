@@ -78,6 +78,35 @@ services:
       - ~/.m2:/root/.m2
     command: ["java", "-jar", "app.jar"]
 
+  prometheus:
+    container_name: prometheus
+    restart: unless-stopped
+    image: prom/prometheus:latest
+    env_file: ./.env
+    ports:
+      - "${PROMETHEUS_LOCAL_PORT}:${PROMETHEUS_DOCKER_PORT}"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - app-network
+
+  grafana:
+    depends_on:
+      - prometheus
+    container_name: grafana
+    restart: unless-stopped
+    image: grafana/grafana:latest
+    env_file: ./.env
+    environment:
+      - PROMETHEUS_PORT=${PROMETHEUS_DOCKER_PORT}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    ports:
+      - "${GRAFANA_LOCAL_PORT}:${GRAFANA_DOCKER_PORT}"
+    volumes:
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+    networks:
+      - app-network
+
 volumes:
   db:
 
