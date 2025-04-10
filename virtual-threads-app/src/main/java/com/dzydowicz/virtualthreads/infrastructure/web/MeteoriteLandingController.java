@@ -66,7 +66,7 @@ class MeteoriteLandingController {
         return new ResponseEntity<>("Meteorite landing with id " + id + "correctly removed.", HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/impact-energy")
+    @PostMapping("/{id}/impact-energy")
     public ResponseEntity<MeteoriteLandingKineticEnergyDTO> getMeteoriteLandingImpactEnergy(@PathVariable Long id) {
         MeteoriteLandingKineticEnergyDTO meteoriteLandingWithKineticEnergy =
                 meteoriteLandingsCalculationsServicePort.getMeteoriteLandingWithKineticEnergy(id);
@@ -74,7 +74,7 @@ class MeteoriteLandingController {
         return new ResponseEntity<>(meteoriteLandingWithKineticEnergy, HttpStatus.OK);
     }
 
-    @GetMapping("/impact-energy")
+    @PostMapping("/impact-energy")
     public ResponseEntity<List<MeteoriteLandingKineticEnergyDTO>> getMeteoriteLandingImpactEnergy(
             @RequestParam(value = "ids", required = false) List<Integer> ids,
             @RequestParam(value = "nameType", required = false) MeteoriteLandingNameTypeEnum nameType,

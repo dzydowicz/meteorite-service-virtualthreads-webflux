@@ -73,7 +73,7 @@ class MeteoriteLandingController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{id}/impact-energy")
+    @PostMapping("/{id}/impact-energy")
     public Mono<ResponseEntity<MeteoriteLandingKineticEnergyDTO>> getMeteoriteLandingImpactEnergy(@PathVariable Long id) {
         return meteoriteLandingsCalculationsServicePort
                 .getMeteoriteLandingWithKineticEnergy(id)
@@ -81,7 +81,7 @@ class MeteoriteLandingController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/impact-energy")
+    @PostMapping("/impact-energy")
     public Flux<MeteoriteLandingKineticEnergyDTO> getMeteoriteLandingImpactEnergy(
             @RequestParam(value = "ids", required = false) List<Integer> ids,
             @RequestParam(value = "nameType", required = false) MeteoriteLandingNameTypeEnum nameType,
